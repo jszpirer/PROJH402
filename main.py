@@ -5,10 +5,10 @@ import ChargeArticles
 
 
 #First, we ask which Google Scholar page should be analysed.
-Link = input("Please enter the link :")
-print("C:\\Users\\hp\\Desktop\\PROJH402\\venv\\Lib\\site-packages\\chromedriver")
-html = ChargeArticles.clickOnShowMore(Link)
+#Link = input("Please enter the link :")
 
-GoogleScholarScraper.get_articles(html)
+#html = ChargeArticles.clickOnShowMore(Link)
 
-#DrawingWithPillow.line("test.jpg")
+#GoogleScholarScraper.get_articles(html)
+
+DrawingWithPillow.line("test.png")
