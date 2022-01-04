@@ -1,8 +1,5 @@
 #Main script for project PROJH402
-import GoogleScholarScraper
-import DrawingWithPillow
-import ChargeArticles
-
+from Artwork import DrawingWithPillow
 
 #First, we ask which Google Scholar page should be analysed.
 #Link = input("Please enter the link :")
@@ -11,4 +8,4 @@ import ChargeArticles
 
 #GoogleScholarScraper.get_articles(html)
 
-DrawingWithPillow.line("test.png")
+DrawingWithPillow.line("Twitter/test.png")
