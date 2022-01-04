@@ -1,12 +1,12 @@
 import tweepy
 import requests
 
-APIkey = "BE9uFt8ziHWsPyYdCIkgIJjii"
-APIkeysecret = "TRjWApU2ZOLFWbdFhyXseEqKFGXpWtUKqQxjPeNsgOTPg6PZnr"
-AccessToken = "1464173540157149189-8cruyoxXxeyLWBrju21xdZ9IyCz3aZ"
-AccessTokenSecret = "2CCloSe2jWEYTGnbj9G6ZqoGzyLhCduK2WCHitoT8ptEz"
-BearerToken = "AAAAAAAAAAAAAAAAAAAAAJLSWAEAAAAAssCzmkhVbIbTj8fIacHFgpahioc" \
-              "%3D6b7ePUesz042UHeWRWQwE57CB7wWx569M47h12pRJCz7VDAR9T"
+APIkey = ""
+APIkeysecret = ""
+AccessToken = ""
+AccessTokenSecret = ""
+BearerToken = "" \
+              ""
 image_headers = {
             'Authorization': 'Bearer {}'.format(AccessToken)
         }
