@@ -1,4 +1,5 @@
-from TwitterScraper import *
+from Twitter.GoogleDriveProj import GoogleDriveProj
 
-coucou = TwitterScraper()
-coucou.tweet_artwork_in_response("test.png", 123)
+gglDrive = GoogleDriveProj()
+print("C'est fini")
+gglDrive.upload_file("test.png")

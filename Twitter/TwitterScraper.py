@@ -59,6 +59,7 @@ class TwitterScraper:
 
     def __upload_artwork_server(self, artwork_image):
         """Function that will upload the artwork on the Twitter server."""
+        #TODO : Change this because impossible to upload media with API v2
         auth_data = {
             'grant_type': 'client_credentials'
         }

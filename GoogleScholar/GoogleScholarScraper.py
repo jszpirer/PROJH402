@@ -1,4 +1,3 @@
-import requests, lxml
 from bs4 import BeautifulSoup
 import os
 
