@@ -1,5 +1,4 @@
-from Twitter.GoogleDriveProj import GoogleDriveProj
 
-gglDrive = GoogleDriveProj()
-print("C'est fini")
-gglDrive.upload_file("test.png")
+from Twitter.TwitterScraper import TwitterScraper
+
+scraper = TwitterScraper()

@@ -11,5 +11,3 @@ from Twitter import GoogleDriveProj
 
 #DrawingWithPillow.line("Twitter/test.png")
 
-gglDrive = GoogleDriveProj()
-gglDrive.upload_file("C:\Users\hp\Desktop\PROJH402\Twitter\\test.png")
