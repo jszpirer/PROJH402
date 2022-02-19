@@ -1,6 +1,6 @@
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-from Google import Create_Service
+from docs.Google import Create_Service
 
 
 class GoogleDriveProj:
@@ -16,7 +16,7 @@ class GoogleDriveProj:
         gfile.Upload()  # Upload the file.
 
     def createService(self):
-        CLIENT_SECRET_FILE = 'client_secrets.json'
+        CLIENT_SECRET_FILE = '../docs/client_secrets.json'
         API_NAME = 'drive'
         API_VERSION = 'v3'
         SCOPES = ['https://www.googleapis.com/auth/drive']

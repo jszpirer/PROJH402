@@ -1,24 +1,56 @@
 from bs4 import BeautifulSoup
-import os
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+import time
+not_interesting_words = ["and", "the", "of", "into", "in"]
 
-headers = {
-    'User-agent':
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19582"
-}
+class GoogleScholarScraper():
 
-proxies = {
-  'http': os.getenv('HTTP_PROXY')
-}
+  def __init__(self):
+    self.option = webdriver.ChromeOptions()
+    self.option.add_argument(" — incognito")
+    self.browser = webdriver.Chrome(ChromeDriverManager().install(),chrome_options=self.option)
+    #self.browser = webdriver.Chrome("chromedriver_win32\\chromedriver", chrome_options=self.option)
+    self.titles = []
 
-def get_articles(link):
-  #html = requests.get(link, headers=headers, proxies=proxies).text
-  soup = BeautifulSoup(link, 'lxml')
+  def get_articles(self, link):
+    html = self.clickOnShowMore(link)
+    soup = BeautifulSoup(html, 'lxml')
+    self.nb_articles = 0
 
-  for article_info in soup.select('#gsc_a_b .gsc_a_tr'):
-    title = article_info.select_one('.gsc_a_at').text
-    title_link = f"https://scholar.google.com{article_info.select_one('.gsc_a_at')['href']}"
-    authors = article_info.select_one('.gsc_a_at+ .gs_gray').text
-    publications = article_info.select_one('.gs_gray+ .gs_gray').text
-    citations = article_info.select_one('.gsc_a_c').text
+    for article_info in soup.select('#gsc_a_b .gsc_a_tr'):
+      title = article_info.select_one('.gsc_a_at').text
+      self.titles.append(title)
+      self.title_link = f"https://scholar.google.com{article_info.select_one('.gsc_a_at')['href']}"
+      self.authors = article_info.select_one('.gsc_a_at+ .gs_gray').text
+      self.publications = article_info.select_one('.gs_gray+ .gs_gray').text
+      self.citations = article_info.select_one('.gsc_a_c').text
+      self.nb_articles+=1
 
-    print(f'Title: {title}\nTitle link: {title_link}\nArticle Author(s): {authors}\nArticle Publication(s): {publications}\nCited by: {citations}')
+      print(f'Title: {title}\nTitle link: {self.title_link}\nArticle Author(s): {self.authors}\nArticle Publication(s): {self.publications}\nCited by: {self.citations}')
+
+  def clickOnShowMore(self, link):
+    self.browser.get(link)
+    python_button = self.browser.find_elements_by_xpath("//*[@id='gsc_bpf_more']")[0]
+    python_button.click()
+    time.sleep(1)
+    return self.browser.page_source
+
+  def create_artwork(self):
+    """Function that will take the Google Scholar information to make an artwork."""
+
+  def find_most_frequent_word(self):
+    """Function that finds the most frequent keyword in article titles."""
+    dict_words = {}
+    for title in self.titles:
+      split_title = title.split()
+      for word in split_title:
+        if word in dict_words:
+          dict_words[word]+=1
+        elif word in not_interesting_words:
+          continue
+        else:
+          dict_words[word]=1
+    #We have to return the most frequent word.
+    max_key = max(dict_words, key=dict_words.get)
+    return max_key
