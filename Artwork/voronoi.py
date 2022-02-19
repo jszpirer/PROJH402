@@ -22,7 +22,6 @@ class voronoi():
         self.number_of_points(most_frequent_word)
         list = self.position_of_points()
         self.FortuneAlgorithm(list, self.draw)
-        print("Hello")
         image.show()
         image.save(output_path)
 
@@ -35,9 +34,10 @@ class voronoi():
         else:
             p = 31
         for x in most_frequent_word:
-            self.nb_points = (self.nb_points + (x - 'a' + 1) * power_of_p) % m
+            self.nb_points = (self.nb_points + (ord(x) - ord('a') + 1) * power_of_p) % m
             power_of_p = (power_of_p * p) % m
-        return ((self.nb_points % m + m) % m ) % 100
+        self.nb_points = ((self.nb_points % m + m) % m ) % 100
+        return self.nb_points
 
     def position_of_points(self):
         # We choose randomly every position for now.
@@ -45,7 +45,7 @@ class voronoi():
         for i in range(self.nb_points):
             # For every point we need to integer values between X1 and X0.
             x = random.randint(X1, X0)
-            y = random.randint(X1, X0)
+            y = random.randint(Y1, Y0)
             p = DataType.Point(x, y)
             list_of_points.append(p)
             self.draw.point((x, y))
@@ -210,8 +210,6 @@ class voronoi():
     def process_point(self):
         # Get the next point from the queue.
         e = points.pop()
-        print("Prochain x", e.x)
-        print("Prochain y", e.y)
 
         # Add a new arc to the parabolic front.
         self.front_insert(e)
@@ -262,7 +260,7 @@ class voronoi():
         # For each segment, we print a line with Pillow
         for segment in output:
             seg = [(segment.start.x, segment.start.y), (segment.end.x, segment.end.y)]
-            draw.voronoi(seg, width=1, fill="green", joint="curve")
+            draw.line(seg, width=1, fill="green", joint="curve")
 
     def FortuneAlgorithm(self, listPoints, draw):
         global X0, Y0, X1, Y1
