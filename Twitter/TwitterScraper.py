@@ -1,5 +1,6 @@
 import tweepy
 from Twitter.GoogleDriveProj import GoogleDriveProj
+from GoogleScholar.GoogleScholarScraper import GoogleScholarScraper
 
 APIkey = ""
 APIkeysecret = ""
@@ -12,13 +13,17 @@ image_headers = {
 
 
 class TwitterScraper:
+    gglScholarScraper = None
+    gglDriveProj = None
+
     def __init__(self):
         """Creates the client that will tweet artworks."""
         self.client = tweepy.Client(bearer_token=BearerToken, consumer_key=APIkey, consumer_secret=APIkeysecret,
                                     access_token=AccessToken, access_token_secret=AccessTokenSecret)
-        print("Ccouco")
+        self.gglScholarScraper = GoogleScholarScraper()
+        self.gglDriveProj = GoogleDriveProj()
         dict_tweets = self.__tweets_with_hashtag()
-        self.analyze_tweets_with_hashatag(dict_tweets)
+        self.analyze_tweets_with_hashtag(dict_tweets)
 
     def update_status(self, tweet):
         self.client.create_tweet(tweet)
@@ -36,26 +41,26 @@ class TwitterScraper:
 
     def __extract_link_google_scholar(self, tweet_text):
         """Check if a Google Scholar link was in the tweet text to generate an artwork."""
-
         tweet_split = tweet_text.split()
         print(tweet_split)
         for word in tweet_split:
             if 'https://t.co/' in word:
+                self.link = word
                 return True
         return False
 
-    def analyze_tweets_with_hashatag(self, tweets_dict):
+    def analyze_tweets_with_hashtag(self, tweets_dict):
         """For each tweet, checks if there is a Google Scholar link. If yes, creates the artwork and tweet it back."""
         for id in tweets_dict.keys():
             if self.__extract_link_google_scholar(tweets_dict[id]):
-                # TODO : Appeler le google scholar scraper qui va renvoyer l'artwork (id dans le Google Drive)
-                artwork = "1DWnWeyLNdY3ambTqk3XSiB4l6IT5VE55" #Id de test pour l'instant
+                output_path = '../Pictures/' + str(id) + '.png'
+                self.gglScholarScraper.create_artwork(self.link, output_path, self.gglDriveProj)
+                artwork = self.gglDriveProj.get_id_from_name(output_path) #Id of the artwork in the Google Drive
                 self.tweet_artwork_in_response(artwork, id)
 
     def tweet_artwork_in_response(self, artwork_image, tweet_id):
         """Tweets the sharing link Google Drive of the artwork"""
-        gglDrive = GoogleDriveProj()
-        text = gglDrive.share_link(artwork_image)
+        text = self.gglDriveProj.share_link(artwork_image)
         self.client.create_tweet(in_reply_to_tweet_id=tweet_id, text=text)
 
 
