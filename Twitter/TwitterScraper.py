@@ -37,6 +37,7 @@ class TwitterScraper:
             return tweets_to_return
         for tweet in tweets.data:
             tweets_to_return[tweet.id] = tweet.text
+            return tweets_to_return
         return tweets_to_return
 
     def __extract_link_google_scholar(self, tweet_text):
@@ -53,7 +54,7 @@ class TwitterScraper:
         """For each tweet, checks if there is a Google Scholar link. If yes, creates the artwork and tweet it back."""
         for id in tweets_dict.keys():
             if self.__extract_link_google_scholar(tweets_dict[id]):
-                output_path = '../Pictures/' + str(id) + '.png'
+                output_path = '../Pictures/' + str(id) + '.pdf'
                 self.gglScholarScraper.create_artwork(self.link, output_path, self.gglDriveProj)
                 artwork = self.gglDriveProj.get_id_from_name(output_path) #Id of the artwork in the Google Drive
                 self.tweet_artwork_in_response(artwork, id)

@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from Artwork.ScipyVoronoi import ScipyVoronoi
 import time
 from Artwork.voronoi import voronoi
 from Twitter.GoogleDriveProj import GoogleDriveProj
@@ -42,7 +43,9 @@ class GoogleScholarScraper():
     """Function that will take the Google Scholar information to make an artwork."""
     self.get_articles(link)
     most_frequent_word = self.__find_most_frequent_word()
-    artwork = voronoi(output_path, most_frequent_word)
+    voronoiDiagram = ScipyVoronoi(output_path, most_frequent_word)
+    voronoiDiagram.make_diagram()
+    # artwork = voronoi(output_path, most_frequent_word)
     drive.upload_file(output_path)
 
 
