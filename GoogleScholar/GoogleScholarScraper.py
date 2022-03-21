@@ -43,7 +43,7 @@ class GoogleScholarScraper():
     """Function that will take the Google Scholar information to make an artwork."""
     self.get_articles(link)
     most_frequent_word = self.__find_most_frequent_word()
-    voronoiDiagram = ScipyVoronoi(output_path, most_frequent_word)
+    voronoiDiagram = ScipyVoronoi(output_path, most_frequent_word, 1)#TODO: Determine the number of the color palette
     voronoiDiagram.make_diagram()
     # artwork = voronoi(output_path, most_frequent_word)
     drive.upload_file(output_path)
