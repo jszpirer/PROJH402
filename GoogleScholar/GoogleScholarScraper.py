@@ -3,8 +3,6 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from Artwork.ScipyVoronoi import ScipyVoronoi
 import time
-from Artwork.voronoi import voronoi
-from Twitter.GoogleDriveProj import GoogleDriveProj
 not_interesting_words = ["and", "the", "of", "into", "in"]
 
 class GoogleScholarScraper():
@@ -21,6 +19,7 @@ class GoogleScholarScraper():
     soup = BeautifulSoup(html, 'lxml')
     self.nb_articles = 0
 
+    """
     for article_info in soup.select('#gsc_a_b .gsc_a_tr'):
       title = article_info.select_one('.gsc_a_at').text
       self.titles.append(title)
@@ -28,7 +27,17 @@ class GoogleScholarScraper():
       self.authors = article_info.select_one('.gsc_a_at+ .gs_gray').text
       self.publications = article_info.select_one('.gs_gray+ .gs_gray').text
       self.citations = article_info.select_one('.gsc_a_c').text
-      self.nb_articles+=1
+      self.nb_articles+=1"""
+
+    self.nb_total_citations = int(soup.select_one('.gsc_rsb_std').string)
+    print(self.nb_total_citations)
+    self.list_of_subjects = []
+    print(soup.select('#gsc_prf_int.gsc_prf_il .gsc_prf_inta.gs_ibl'))
+    for subject in soup.select('#gsc_prf_int.gsc_prf_il .gsc_prf_inta.gs_ibl'):
+      new_subject = subject.string
+      self.list_of_subjects.append(new_subject)
+
+
 
       #print(f'Title: {title}\nTitle link: {self.title_link}\nArticle Author(s): {self.authors}\nArticle Publication(s): {self.publications}\nCited by: {self.citations}')
 
@@ -42,8 +51,8 @@ class GoogleScholarScraper():
   def create_artwork(self, link, output_path, drive) :
     """Function that will take the Google Scholar information to make an artwork."""
     self.get_articles(link)
-    most_frequent_word = self.__find_most_frequent_word()
-    voronoiDiagram = ScipyVoronoi(output_path, most_frequent_word, 1)#TODO: Determine the number of the color palette
+    #most_frequent_word = self.__find_most_frequent_word()
+    voronoiDiagram = ScipyVoronoi(output_path, self.nb_total_citations, self.list_of_subjects)#TODO: Determine the number of the color palette
     voronoiDiagram.make_diagram()
     # artwork = voronoi(output_path, most_frequent_word)
     drive.upload_file(output_path)

@@ -1,9 +1,10 @@
 #This class is used to choose between different color palettes for the Voronoi Diagram
 import sqlite3
 from sqlite3 import Error
+import random
 
 
-class Database_color:
+class Database:
     location = None
     connection = None
     cursor = None
@@ -11,7 +12,10 @@ class Database_color:
     def __init__(self, location):
         self.location = location
         #A retirer pour l'utilisateur car la database sera d'office créée.
-        self.__create_table()
+        #self.__create_table_colors()
+        #self.add_palettes()
+        #self.__create_table_subjects()
+        #self.remove_all_rows_subjects()
 
     def __open_connection(self):
         """Creates the connection with the database if the database does not already exist."""
@@ -26,7 +30,7 @@ class Database_color:
         self.cursor.close()
         self.connection.close()
 
-    def __create_table(self):
+    def __create_table_colors(self):
         """Creates the table containing username1, username2 and common key associated."""
         self.__open_connection()
         sql_request = """CREATE TABLE IF NOT EXISTS color_palettes(
@@ -48,10 +52,34 @@ class Database_color:
         self.connection.commit()
         self.__close_connection()
 
+    def __create_table_subjects(self):
+        """Creates the table containing username1, username2 and common key associated."""
+        self.__open_connection()
+        sql_request = """CREATE TABLE IF NOT EXISTS subjects(
+                                subject text PRIMARY KEY,
+                                palette integer NOT NULL);"""
+        try:
+            self.cursor.execute(sql_request)
+        except Error as e:
+            print(e)
+        self.connection.commit()
+        self.__close_connection()
+
     def remove_all_rows(self):
         """Deletes all rows from the palette table."""
         self.__open_connection()
         sql_request = """DELETE FROM color_palettes"""
+        try:
+            self.cursor.execute(sql_request)
+        except Error as e:
+            print(e)
+        self.connection.commit()
+        self.__close_connection()
+
+    def remove_all_rows_subjects(self):
+        """Deletes all rows from the palette table."""
+        self.__open_connection()
+        sql_request = """DELETE FROM subjects"""
         try:
             self.cursor.execute(sql_request)
         except Error as e:
@@ -72,18 +100,50 @@ class Database_color:
 
     def get_palette(self, numberOfPalette):
         self.__open_connection()
+        print("C'est la palette :"+str(numberOfPalette))
         sql_select = """
                     SELECT color1, color2, color3, color4, color5, color6, color7, color8, color9, color10
                     FROM color_palettes
                     WHERE name = '""" + str(numberOfPalette) + """';"""
         self.cursor.execute(sql_select)
         data = self.cursor.fetchall()
-        print(data)
-        result =  data[0]
+        result = data[0]
         self.__close_connection()
         return result
 
-test = Database_color("colors.db")
-test.remove_all_rows()
-test.add_palettes()
-test.get_palette(1)
+    def get_palette_from_subject(self, subject):
+        self.__open_connection()
+        sql_select = """SELECT palette
+                        FROM subjects
+                        WHERE subject = '""" +subject+ """';"""
+        self.cursor.execute(sql_select)
+        data = self.cursor.fetchall()
+        if len(data) == 0:
+            return None
+        result = data[0][0]
+        self.__close_connection()
+        return result
+
+    def add_subject(self, subject, palette):
+        self.__open_connection()
+        sql_add = """INSERT INTO subjects
+                        VALUES ('"""+subject+"""', """+str(palette)+""");"""
+        self.cursor.execute(sql_add)
+        self.connection.commit()
+        self.__close_connection()
+
+    def color_from_subject(self, list_of_subjects):
+        for subject in list_of_subjects:
+            color = self.get_palette_from_subject(subject)
+            if color is not None:
+                return color
+        # We need to add a color for the first subject
+        new_color = random.randint(1, 3)
+        print(new_color)
+        self.add_subject(list_of_subjects[0], new_color)
+        return new_color
+
+#test = Database("ArtCreator.db")
+#test.remove_all_rows()
+#test.add_palettes()
+#test.get_palette(1)

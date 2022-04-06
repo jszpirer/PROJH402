@@ -26,7 +26,7 @@ class GoogleDriveProj:
             fileId=gfile['id'], body=new_permission, supportsTeamDrives=True).execute(http=gfile.http)
 
     def createService(self):
-        CLIENT_SECRET_FILE = 'client_secrets.json'
+        CLIENT_SECRET_FILE = '../client_secrets.json'
         API_NAME = 'drive'
         API_VERSION = 'v3'
         SCOPES = ['https://www.googleapis.com/auth/drive']

@@ -1,14 +1,15 @@
-#Main script for project PROJH402
-from Artwork.voronoi import voronoi
-from Twitter import GoogleDriveProj
-from GoogleScholar.GoogleScholarScraper import GoogleScholarScraper
+# Main script for project PROJH402
 
-#First, we ask which Google Scholar page should be analysed.
-Link = input("Please enter the link :")
-gglScraper = GoogleScholarScraper()
-gglScraper.get_articles(Link)
-#word = gglScraper.find_most_frequent_word()
-#art = voronoi("test.png", word)
+import time
+from Twitter.TwitterScraper import TwitterScraper
 
-#DrawingWithPillow.line("Twitter/test.png")
+scraper = TwitterScraper()
+
+while True:
+    time.sleep(3)
+    print("Start again")
+    scraper.start()
+
+
+
 
