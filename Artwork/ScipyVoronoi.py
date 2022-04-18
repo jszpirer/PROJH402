@@ -35,8 +35,8 @@ class ScipyVoronoi():
         nb_points = ((nb_points % m + m) % m) % 500
         return nb_points
 
-    def number_of_points(self, citations):
-        """Calculate the number of points thanks to the number of citations."""
+    """def number_of_points(self, citations):
+        #Calculate the number of points thanks to the number of citations.
         print("C'est le type")
         print(type(citations))
         nb_points = citations%900
@@ -48,19 +48,38 @@ class ScipyVoronoi():
             nb_points += citations//100
         else:
             nb_points//2
+        return nb_points"""
+
+    def number_of_points(self, citations):
+        #nb_points = 20*int(np.log2(citations))
+        nb_points = 10*int(np.sqrt(citations))
+        if nb_points < 4:
+            nb_points += 4
         return nb_points
 
-    def position_of_points(self, nb_points):
+    def position_of_points(self, nb_points, dict_years: dict):
         # The position of points depends on something.
-        #list_of_points = np.random.weibull(a=3, size=[nb_points, 2])
+        # list_of_points = np.random.weibull(a=3, size=[nb_points, 2])
+        # On calcule d'abord le pourcentage d'articles par année
+        total_articles = 0
+        total_years = 0
+        for key in dict_years.keys():
+            total_articles += dict_years[key]
+            total_years += 1
+        # Il faut re-parcourir la liste pour avoir le pourcentage d'article par année
+        dict_years = dict(sorted(dict_years.items()))
+        for key in dict_years.keys():
+            dict_years[key] /= total_articles
+            print(key, dict_years[key])
+        # Il va falloir créer une ndarray (liste = np.ndarray((nb_points, 2), float)) pour stocker les nouveaux points.
         list_of_points = np.random.beta(a=2, b=8, size=[nb_points, 2])
         return list_of_points
 
-    def make_diagram(self):
+    def make_diagram(self, dict_years: dict):
         # generate data/speed values
         # nb_points = self.number_of_points_v1()
         nb_points = self.number_of_points(self.citations)
-        points = self.position_of_points(nb_points)
+        points = self.position_of_points(nb_points, dict_years)
         speed = np.random.uniform(low=0.0, high=15.0,
                                   size=nb_points)  # TODO: A améliorer pour que ça ne soit plus random
 

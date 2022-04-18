@@ -1,14 +1,17 @@
 # Main script for project PROJH402
 
-import time
 from Twitter.TwitterScraper import TwitterScraper
 
-scraper = TwitterScraper()
+from threading import Event
 
-while True:
-    time.sleep(3)
-    print("Start again")
+
+scraper = TwitterScraper()
+stopFlag = Event()
+
+while not stopFlag.wait(3):
     scraper.start()
+
+
 
 
 
