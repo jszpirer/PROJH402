@@ -56,19 +56,37 @@ class TwitterScraper:
                 return True
         return False
 
+    def type_of_answer(self, tweet_text):
+        """Check if the script has to produce a gif or not."""
+        tweet_split = tweet_text.split()
+        for word in tweet_split:
+            if word == '#GIF':
+                return True
+        return False
+
     def analyze_tweets_with_hashtag(self, tweets_dict):
         """For each tweet, checks if there is a Google Scholar link. If yes, creates the artwork and tweet it back."""
         for id in tweets_dict.keys():
             if self.__extract_link_google_scholar(tweets_dict[id]):
-                output_path = 'Pictures/' + str(id) + '.pdf'
-                self.gglScholarScraper.create_artwork(self.link, output_path, self.gglDriveProj)
-                artwork = self.gglDriveProj.get_id_from_name(output_path)  # Id of the artwork in the Google Drive
+                output_path = str(id)
+                isGif = self.type_of_answer(tweets_dict[id])
+                response = self.gglScholarScraper.create_artwork(self.link, output_path, self.gglDriveProj, isGif)
+                if response is None:
+                    self.wrong_asking_link(id)
+                    return 0
+                artwork = self.gglDriveProj.get_id_from_name(response)  # Id of the artwork in the Google Drive
                 self.tweet_artwork_in_response(artwork, id)
+
+    def wrong_asking_link(self, tweet_id):
+        """Response to the tweet that had the right hashtag but a wrong link."""
+        self.client.create_tweet(in_reply_to_tweet_id=tweet_id, text="You did not give a link to a Google Scholar profile.")
+        print("Tweet posted!")
 
     def tweet_artwork_in_response(self, artwork_image, tweet_id):
         """Tweets the sharing link Google Drive of the artwork"""
         text = self.gglDriveProj.share_link(artwork_image)
         self.client.create_tweet(in_reply_to_tweet_id=tweet_id, text=text)
+        print("Tweet posted!")
 
     def __change_last_tweet(self, tweet_id):
         if tweet_id != 0:

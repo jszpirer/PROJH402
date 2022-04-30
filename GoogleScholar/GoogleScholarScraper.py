@@ -17,6 +17,8 @@ class GoogleScholarScraper():
         self.option.add_argument(" — incognito")
         self.browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=self.option)
         html = self.__clickOnShowMore(link)
+        if html is None:
+            return None
         soup = BeautifulSoup(html, 'lxml')
         self.nb_articles = 0
         dict_articles_peryear = {}
@@ -28,24 +30,29 @@ class GoogleScholarScraper():
             # self.authors = article_info.select_one('.gsc_a_at+ .gs_gray').text
             # self.publications = article_info.select_one('.gs_gray+ .gs_gray').text
             # self.citations = article_info.select_one('.gsc_a_c').text
-            year = int(article_info.select_one('.gsc_a_y').text)
-            if year in dict_articles_peryear.keys():
-                dict_articles_peryear[year] += 1
-            else:
-                dict_articles_peryear[year] = 1
+            year_text = article_info.select_one('.gsc_a_y').text
+            if len(year_text)!=0:
+                year = int(year_text)
+                if year in dict_articles_peryear.keys():
+                    dict_articles_peryear[year] += 1
+                else:
+                    dict_articles_peryear[year] = 1
 
         self.nb_total_citations = int(soup.select_one('.gsc_rsb_std').string)
-        self.list_of_subjects = []
-        for subject in soup.select('#gsc_prf_int.gsc_prf_il .gsc_prf_inta.gs_ibl'):
-            new_subject = subject.string
-            self.list_of_subjects.append(new_subject)
+        self.profile_name = soup.select_one('#gsc_prf_in').string
+        self.list_of_coauthors = []
+        for author in soup.select('#gsc_rsb_co.gsc_rsb_s.gsc_prf_pnl .gsc_rsb_a_desc'):
+            self.list_of_coauthors.append(author.a.string)
 
         return dict_articles_peryear
 
 
     def __clickOnShowMore(self, link):
         self.browser.get(link)
-        python_button = self.browser.find_elements_by_xpath("//*[@id='gsc_bpf_more']")[0]
+        list_of_buttons = self.browser.find_elements_by_xpath("//*[@id='gsc_bpf_more']")
+        if len(list_of_buttons)==0:
+            return None
+        python_button = list_of_buttons[0]
         python_button.click()
         time.sleep(1)
         python_button = self.browser.find_elements_by_xpath("//*[@id='gsc_bpf_more']")[0]
@@ -53,14 +60,19 @@ class GoogleScholarScraper():
         time.sleep(1)
         return self.browser.page_source
 
-    def create_artwork(self, link, output_path, drive):
+    def create_artwork(self, link, output_path, drive, isGif):
         """Function that will take the Google Scholar information to make an artwork."""
+        print(output_path)
         dict_years = self.get_articles(link)
-        # most_frequent_word = self.__find_most_frequent_word()
-        voronoiDiagram = ScipyVoronoi(output_path, self.nb_total_citations, self.list_of_subjects)
-        voronoiDiagram.make_diagram(dict_years)
-        # artwork = voronoi(output_path, most_frequent_word)
-        drive.upload_file(output_path)
+        if dict_years is None:
+            return None
+        voronoiDiagram = ScipyVoronoi(output_path, self.nb_total_citations, self.list_of_coauthors, self.profile_name)
+        if isGif:
+            voronoiDiagram.make_gif(dict_years, 6)
+        else:
+            voronoiDiagram.make_diagram(dict_years)
+        drive.upload_file(voronoiDiagram.get_outputpath())
+        return voronoiDiagram.get_outputpath()
 
     def __find_most_frequent_word(self):
         """Function that finds the most frequent keyword in article titles."""

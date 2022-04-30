@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 from scipy.spatial import Voronoi, voronoi_plot_2d
 from Artwork.Database import Database
+import os
+import glob
+from PIL import Image
 
 
 class ScipyVoronoi():
@@ -14,12 +17,13 @@ class ScipyVoronoi():
     cmap = None
     palette = None
 
-    def __init__(self, output_path, citations, list_of_subjects):
+    def __init__(self, output_path, citations, list_of_coauthors, profile_name):
         #self.most_frequent_word = most_frequent_word
         self.citations = citations
         self.output_path = output_path
         self.color_database = Database("Artwork/ArtCreator.db")
-        self.palette = self.color_database.color_from_subject(list_of_subjects)
+        self.palette = self.color_database.color_from_coauthors(list_of_coauthors, profile_name)
+        self.id = output_path
 
     def number_of_points_v1(self):
         nb_points = 0
@@ -67,15 +71,41 @@ class ScipyVoronoi():
             total_articles += dict_years[key]
             total_years += 1
         # Il faut re-parcourir la liste pour avoir le pourcentage d'article par année
+        if total_years == 0:
+            return np.random.weibull(a=3, size=[nb_points, 2])
         dict_years = dict(sorted(dict_years.items()))
+        list_percentage = []
         for key in dict_years.keys():
             dict_years[key] /= total_articles
-            print(key, dict_years[key])
-        # Il va falloir créer une ndarray (liste = np.ndarray((nb_points, 2), float)) pour stocker les nouveaux points.
-        list_of_points = np.random.beta(a=2, b=8, size=[nb_points, 2])
+            list_percentage.append(dict_years[key])
+        list_of_points = np.ndarray((nb_points, 2), float) # Now we have to change the values into the right ones.
+        # list_of_points = np.random.beta(a=2, b=8, size=[nb_points, 2])
+        # On doit séparer l'espace en le nombre d'années du dictionnaire, trop d'espaces diff
+        # On sépare d'abord en quatre parties.
+        splitted_points = np.array_split(list_percentage, 4)
+        p = 0
+        r = 0
+        for line in range(2):
+            for column in range(2):
+                percentages = 0
+                for perc in splitted_points[p]:
+                    percentages+=perc
+                # On a le pourcentage du quartier
+                p+=1
+                points_of_quarter = int(nb_points*percentages)
+                # Maintenant il faut trouver les coordonnées de chaque point.
+                for point in range(points_of_quarter):
+                    #x = np.random.uniform(low=column*0.5,high=(column+1)*0.5)
+                    #y = np.random.uniform(low=line*0.5,high=(line+1)*0.5)
+                    x = np.random.normal(0.25+column*0.5, 0.2, size=(1,1))
+                    y = np.random.normal(0.25+line*0.5, 0.2, size=(1,1))
+                    list_of_points[r][0] = x[0][0]
+                    list_of_points[r][1] = y[0][0]
+                    r += 1
+        list_of_points = list_of_points[:r]
         return list_of_points
 
-    def make_diagram(self, dict_years: dict):
+    def make_diagram(self, dict_years: dict, path_gif=None):
         # generate data/speed values
         # nb_points = self.number_of_points_v1()
         nb_points = self.number_of_points(self.citations)
@@ -105,9 +135,13 @@ class ScipyVoronoi():
             if not -1 in region:
                 polygon = [vor.vertices[i] for i in region]
                 plt.fill(*zip(*polygon), color=mapper.to_rgba(speed[r]))
-        # plt.show()
+        #plt.show()
         plt.axis("off")
-        plt.savefig(self.output_path, bbox_inches='tight')
+        self.output_path = "Pictures/"+self.output_path+".pdf"
+        if path_gif is None:
+            plt.savefig(self.output_path, bbox_inches='tight')
+        else:
+            plt.savefig(path_gif, bbox_inches='tight')
         return 0
 
     # Permet de tester les palettes créées facilement
@@ -139,10 +173,49 @@ class ScipyVoronoi():
             tuple_to_add = tuple(ti / 255 for ti in new_color)
             self.cmap.append(tuple_to_add)
 
+    def make_gif(self, dict_years : dict, nb_images):
+        # Creates a gif from voronoi diagrams.
+        nb_image = 0
+        file_names=[]
+        for i in range(nb_images):
+            path_image = "Gif/" + str(nb_image) + ".png"
+            self.make_diagram(dict_years, path_gif=path_image)
+            file_names.append(path_image)
+            if len(dict_years)!=0:
+                self.citations -= dict_years[sorted(dict_years)[-1]]
+                dict_years.popitem()
+            nb_image+=1
+        images = [Image.open(fn) for fn in file_names]
+        self.output_path = "Gif/"+self.id+".gif"
+        images[0].save(self.output_path,"GIF", save_all=True, append_images=images[1:], duration=300, loop=0)
+        # End of the function
+        self.clean_folders()
+        return 0
 
-#test = ScipyVoronoi("../Pictures/test.pdf", "Salux", 2)
+    def get_outputpath(self):
+        return self.output_path
+
+    def clean_folders(self):
+        print("Début de clean")
+        files = glob.glob('Gif/*.png')
+        for f in files:
+            os.remove(f)
+        print("On fait pareil pour Pictures")
+        files = glob.glob('Pictures/*')
+        for f in files:
+            os.remove(f)
+        return 0
+
+
+
+
+#test = ScipyVoronoi("../Pictures/test.pdf", 4000, ["Swarm Intelligence"])
 #test.make_diagram()
 # cmap = ListedColormap(["darkorange", "gold", "lawngreen", "lightseagreen"])
 # test.get_palette_in_database(1)
 # cmap = LinearSegmentedColormap.from_list("mycmap", test.cmap)
 # test.plot_examples([cmap])
+
+
+#dict_test = {1998:5, 1999:78, 1997:65, 1996:43, 2000:9, 2010:7, 2011:34, 2014:23}
+#test.make_gif(dict_test, 4)

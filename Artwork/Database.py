@@ -11,11 +11,9 @@ class Database:
 
     def __init__(self, location):
         self.location = location
-        #A retirer pour l'utilisateur car la database sera d'office créée.
-        #self.__create_table_colors()
-        #self.add_palettes()
-        #self.__create_table_subjects()
-        #self.remove_all_rows_subjects()
+        self.__create_table_colors()
+        self.__create_table_coauthors()
+
 
     def __open_connection(self):
         """Creates the connection with the database if the database does not already exist."""
@@ -52,11 +50,11 @@ class Database:
         self.connection.commit()
         self.__close_connection()
 
-    def __create_table_subjects(self):
+    def __create_table_coauthors(self):
         """Creates the table containing username1, username2 and common key associated."""
         self.__open_connection()
-        sql_request = """CREATE TABLE IF NOT EXISTS subjects(
-                                subject text PRIMARY KEY,
+        sql_request = """CREATE TABLE IF NOT EXISTS coauthors(
+                                author text PRIMARY KEY,
                                 palette integer NOT NULL);"""
         try:
             self.cursor.execute(sql_request)
@@ -68,7 +66,7 @@ class Database:
     def remove_all_rows(self):
         """Deletes all rows from the palette table."""
         self.__open_connection()
-        sql_request = """DELETE FROM color_palettes"""
+        sql_request = """DROP TABLE color_palettes;"""
         try:
             self.cursor.execute(sql_request)
         except Error as e:
@@ -79,7 +77,7 @@ class Database:
     def remove_all_rows_subjects(self):
         """Deletes all rows from the palette table."""
         self.__open_connection()
-        sql_request = """DELETE FROM subjects"""
+        sql_request = """DROP TABLE subjects"""
         try:
             self.cursor.execute(sql_request)
         except Error as e:
@@ -91,16 +89,16 @@ class Database:
         """Function that needs to be used once to add all palettes in the database."""
         self.__open_connection()
         sql_insert_client = """INSERT INTO color_palettes
-                     VALUES(1, '(0,18,25)', '(0,95,115)', '(10,147,150)', '(148,210,189)', '(233,216,166)', '(238,155,0)', '(202,103,2)', '(187,62,3)', '(174,32,18)', '(155,34,38)'), 
-                     (2, '(5,60,94)', '(29,57,88)', '(53,54,82)', '(76,51,77)', '(100,48,71)', '(124,46,65)', '(148,43,59)', '(171,40,54)', '(195,37,48)', '(219, 34, 42)'),
-                     (3, '(217,237,146)', '(181,228,140)', '(153,217,140)', '(118,200,147)', '(82,182,154)', '(52,160,164)', '(22,138,173)', '(26,117,159)', '(30,96,145)', '(24,78,119)');"""
+                     VALUES(1, '(255,255,255)', '(218,242,218)', '(184,230,184)', '(152,217,152)', '(106,77,50)', '(0,0,0)', '(30,63,31)', '(107,50,17)', '(70,105,0)', '(124,67,37)'), 
+                     (2, '(220,172,164)', '(188,132,124)', '(164,76,20)', '(84,60,60)', '(28,36,36)', '(228,228,228)', '(195,115,115)', '(199,142,142)', '(199,162,142)', '(125, 48, 6)'),
+                     (3, '(218,189,166)', '(91,51,37)', '(159,123,79)', '(40,30,27)', '(143,96,59)', '(170,157,141)', '(167,146,140)', '(133,99,92)', '(180,108,60)', '(214,178,113)'),
+                     (4, '(235,214,188)', '(44,25,24)', '(192,99,59)', '(135,52,37)', '(178,151,144)', '(130,117,108)', '(244,168,51)', '(84,73,67)', '(91,87,84)', '(84,60,60)');"""
         self.cursor.execute(sql_insert_client)
         self.connection.commit()
         self.__close_connection()
 
     def get_palette(self, numberOfPalette):
         self.__open_connection()
-        print("C'est la palette :"+str(numberOfPalette))
         sql_select = """
                     SELECT color1, color2, color3, color4, color5, color6, color7, color8, color9, color10
                     FROM color_palettes
@@ -111,11 +109,11 @@ class Database:
         self.__close_connection()
         return result
 
-    def get_palette_from_subject(self, subject):
+    def get_palette_from_author(self, author):
         self.__open_connection()
         sql_select = """SELECT palette
-                        FROM subjects
-                        WHERE subject = '""" +subject+ """';"""
+                        FROM coauthors
+                        WHERE author = '""" +author+ """';"""
         self.cursor.execute(sql_select)
         data = self.cursor.fetchall()
         if len(data) == 0:
@@ -124,26 +122,51 @@ class Database:
         self.__close_connection()
         return result
 
-    def add_subject(self, subject, palette):
+    def add_author(self, author, palette):
         self.__open_connection()
-        sql_add = """INSERT INTO subjects
-                        VALUES ('"""+subject+"""', """+str(palette)+""");"""
-        self.cursor.execute(sql_add)
+        sql_add = """INSERT INTO coauthors
+                        VALUES ('"""+author+"""', """+str(palette)+""");"""
+        try:
+            self.cursor.execute(sql_add)
+        except Error as e:
+            print(e)
         self.connection.commit()
         self.__close_connection()
 
-    def color_from_subject(self, list_of_subjects):
-        for subject in list_of_subjects:
-            color = self.get_palette_from_subject(subject)
-            if color is not None:
-                return color
-        # We need to add a color for the first subject
-        new_color = random.randint(1, 3)
-        print(new_color)
-        self.add_subject(list_of_subjects[0], new_color)
+    def color_from_coauthors(self, list_of_coauthors, profile_name):
+        colors = []
+        color_in_db = self.get_palette_from_author(profile_name)
+        if color_in_db is not None:
+            new_color = color_in_db
+        else:
+            if len(list_of_coauthors)==0:
+                new_color = random.randint(1, 4)
+            else:
+                for author in list_of_coauthors:
+                    print(author)
+                    color = self.get_palette_from_author(author)
+                    if color is not None:
+                        print(color)
+                        colors.append(color)
+                if len(colors)==0:
+                    new_color = random.randint(1, 4)
+                else:
+                    new_color = self.most_frequent(colors)
+            self.add_author(profile_name, new_color)
         return new_color
 
+    def most_frequent(self, colors):
+        counter = 0
+        num = colors[0]
+
+        for i in colors:
+            curr_frequency = colors.count(i)
+            if (curr_frequency > counter):
+                counter = curr_frequency
+                num = i
+
+        return num
 #test = Database("ArtCreator.db")
 #test.remove_all_rows()
 #test.add_palettes()
-#test.get_palette(1)
+#test.get_palette('4')

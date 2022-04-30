@@ -12,7 +12,8 @@ class GoogleDriveProj:
 
     def upload_file(self, filename):
         gfile = self.drive.CreateFile({'parents': [{'id': '118fLfsoSmGZCg9ISKrNbiieQSQPTpi7F'}]})
-        # Read file and set it as the content of PROJH402 folder.
+        # Read file and set it as the content of PROJH402 folder.ù
+        print("Uploading...")
         gfile.SetContentFile(filename)
         gfile.Upload()  # Upload the file.
         new_permission = {
