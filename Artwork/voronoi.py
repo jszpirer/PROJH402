@@ -1,3 +1,5 @@
+# Class used before finding out that scipy was doing it pretty well
+
 from PIL import Image, ImageDraw
 from Artwork import DataType
 import math

@@ -166,7 +166,3 @@ class Database:
                 num = i
 
         return num
-#test = Database("ArtCreator.db")
-#test.remove_all_rows()
-#test.add_palettes()
-#test.get_palette('4')

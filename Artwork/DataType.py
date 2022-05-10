@@ -1,4 +1,6 @@
-import heapq  # utlisé pour faire la queue
+# Used before finding out that scipy was doing the job pretty well.
+
+import heapq
 import itertools
 
 

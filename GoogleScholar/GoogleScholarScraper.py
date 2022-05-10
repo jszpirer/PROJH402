@@ -68,7 +68,7 @@ class GoogleScholarScraper():
             return None
         voronoiDiagram = ScipyVoronoi(output_path, self.nb_total_citations, self.list_of_coauthors, self.profile_name)
         if isGif:
-            voronoiDiagram.make_gif(dict_years, 6)
+            voronoiDiagram.make_gif_evolution(dict_years)
         else:
             voronoiDiagram.make_diagram(dict_years)
         drive.upload_file(voronoiDiagram.get_outputpath())
